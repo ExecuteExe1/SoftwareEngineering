@@ -39,24 +39,16 @@ app.get('/books/:bookId', (req, res) => {
   const bookId = parseInt(req.params.bookId);
   const book = books.find(b => b.id === bookId);
   
-  if (!book) {
-    return res.status(404).json({ error: 'Book not found' });
-  }
-  
-  res.status(200).json(book);
+  // According to YAML, always return 200 with book data
+  // If book doesn't exist, return empty object or null
+  res.status(200).json(book || {});
 });
 
 // POST /books - Add a new book
 app.post('/books', (req, res) => {
   const { title, author_id, category_id, published_year } = req.body;
   
-  // Validation
-  if (!title || !author_id || !category_id || !published_year) {
-    return res.status(400).json({ 
-      error: 'Missing required fields. Required: title, author_id, category_id, published_year' 
-    });
-  }
-  
+  // No validation - assume all fields are provided
   const newBook = {
     id: currentBookId++,
     title,
@@ -76,8 +68,17 @@ app.put('/books/:bookId', (req, res) => {
   
   const bookIndex = books.findIndex(b => b.id === bookId);
   
+  // If book doesn't exist, create it (YAML doesn't specify 404)
   if (bookIndex === -1) {
-    return res.status(404).json({ error: 'Book not found' });
+    const newBook = {
+      id: bookId,
+      title,
+      author_id: parseInt(author_id),
+      category_id: parseInt(category_id),
+      published_year: parseInt(published_year)
+    };
+    books.push(newBook);
+    return res.status(200).json(newBook);
   }
   
   // Update only provided fields
@@ -92,14 +93,10 @@ app.put('/books/:bookId', (req, res) => {
 // DELETE /books/:bookId - Delete a book
 app.delete('/books/:bookId', (req, res) => {
   const bookId = parseInt(req.params.bookId);
-  const initialLength = books.length;
   
   books = books.filter(b => b.id !== bookId);
   
-  if (books.length === initialLength) {
-    return res.status(404).json({ error: 'Book not found' });
-  }
-  
+  // Always return 204, even if book didn't exist
   res.status(204).send();
 });
 
@@ -115,21 +112,15 @@ app.get('/authors/:authorId', (req, res) => {
   const authorId = parseInt(req.params.authorId);
   const author = authors.find(a => a.id === authorId);
   
-  if (!author) {
-    return res.status(404).json({ error: 'Author not found' });
-  }
-  
-  res.status(200).json(author);
+  // Always return 200
+  res.status(200).json(author || {});
 });
 
 // POST /authors - Add a new author
 app.post('/authors', (req, res) => {
   const { name } = req.body;
   
-  if (!name) {
-    return res.status(400).json({ error: 'Missing required field: name' });
-  }
-  
+  // No validation
   const newAuthor = {
     id: currentAuthorId++,
     name
@@ -146,12 +137,14 @@ app.put('/authors/:authorId', (req, res) => {
   
   const authorIndex = authors.findIndex(a => a.id === authorId);
   
+  // If author doesn't exist, create it
   if (authorIndex === -1) {
-    return res.status(404).json({ error: 'Author not found' });
-  }
-  
-  if (!name) {
-    return res.status(400).json({ error: 'Missing required field: name' });
+    const newAuthor = {
+      id: authorId,
+      name
+    };
+    authors.push(newAuthor);
+    return res.status(200).json(newAuthor);
   }
   
   authors[authorIndex].name = name;
@@ -161,13 +154,8 @@ app.put('/authors/:authorId', (req, res) => {
 // DELETE /authors/:authorId - Delete an author
 app.delete('/authors/:authorId', (req, res) => {
   const authorId = parseInt(req.params.authorId);
-  const initialLength = authors.length;
   
   authors = authors.filter(a => a.id !== authorId);
-  
-  if (authors.length === initialLength) {
-    return res.status(404).json({ error: 'Author not found' });
-  }
   
   res.status(204).send();
 });
@@ -184,21 +172,15 @@ app.get('/categories/:categoryId', (req, res) => {
   const categoryId = parseInt(req.params.categoryId);
   const category = categories.find(c => c.id === categoryId);
   
-  if (!category) {
-    return res.status(404).json({ error: 'Category not found' });
-  }
-  
-  res.status(200).json(category);
+  // Always return 200
+  res.status(200).json(category || {});
 });
 
 // POST /categories - Add a new category
 app.post('/categories', (req, res) => {
   const { name } = req.body;
   
-  if (!name) {
-    return res.status(400).json({ error: 'Missing required field: name' });
-  }
-  
+  // No validation
   const newCategory = {
     id: currentCategoryId++,
     name
@@ -215,12 +197,14 @@ app.put('/categories/:categoryId', (req, res) => {
   
   const categoryIndex = categories.findIndex(c => c.id === categoryId);
   
+  // If category doesn't exist, create it
   if (categoryIndex === -1) {
-    return res.status(404).json({ error: 'Category not found' });
-  }
-  
-  if (!name) {
-    return res.status(400).json({ error: 'Missing required field: name' });
+    const newCategory = {
+      id: categoryId,
+      name
+    };
+    categories.push(newCategory);
+    return res.status(200).json(newCategory);
   }
   
   categories[categoryIndex].name = name;
@@ -230,13 +214,8 @@ app.put('/categories/:categoryId', (req, res) => {
 // DELETE /categories/:categoryId - Delete a category
 app.delete('/categories/:categoryId', (req, res) => {
   const categoryId = parseInt(req.params.categoryId);
-  const initialLength = categories.length;
   
   categories = categories.filter(c => c.id !== categoryId);
-  
-  if (categories.length === initialLength) {
-    return res.status(404).json({ error: 'Category not found' });
-  }
   
   res.status(204).send();
 });
@@ -273,16 +252,8 @@ app.get('/', (req, res) => {
   });
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Endpoint not found' });
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
-});
+// REMOVED: 404 handler (not in YAML)
+// REMOVED: 500 error handler (not in YAML)
 
 app.listen(PORT, () => {
   console.log(`Bookstore API running at http://localhost:${PORT}`);
@@ -303,3 +274,5 @@ app.listen(PORT, () => {
   console.log(`  PUT  /categories/:id`);
   console.log(`  DELETE /categories/:id`);
 });
+
+module.exports = app;
