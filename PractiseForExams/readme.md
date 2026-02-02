@@ -61,7 +61,7 @@ npm install express cors
 # Step 3: Install nodemon as dev dependency
 npm install --save-dev nodemon
 
-# Step 4: Update package.json with scripts
+# Step 4: Make sure your package.json is the same as here
 # Edit package.json and add the "scripts" section shown above
 
 # Step 5: Create server.js with the code I provided
