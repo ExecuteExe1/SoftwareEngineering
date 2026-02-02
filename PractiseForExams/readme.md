@@ -48,3 +48,23 @@ echo "=== All data ==="
 echo "Books:"; curl -s http://localhost:3000/books | python -m json.tool
 echo -e "\nAuthors:"; curl -s http://localhost:3000/authors | python -m json.tool
 echo -e "\nCategories:"; curl -s http://localhost:3000/categories | python -m json.tool
+
+
+
+echo "How to install the appropriate testing library"
+echo "# Step 1: Initialize npm project
+npm init -y
+
+# Step 2: Install dependencies
+npm install express cors
+
+# Step 3: Install nodemon as dev dependency
+npm install --save-dev nodemon
+
+# Step 4: Update package.json with scripts
+# Edit package.json and add the "scripts" section shown above
+
+# Step 5: Create server.js with the code I provided
+
+# Step 6: Run the server
+npm run dev "
